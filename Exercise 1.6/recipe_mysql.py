@@ -31,13 +31,16 @@ def calculate_difficulty(cooking_time, ingredients):
     num_ingredients = len(ingredients)
     if cooking_time < 10 and num_ingredients < 4:
         difficulty = "Easy"
+        return difficulty
     elif cooking_time < 10 and num_ingredients >= 4:
         difficulty = "Medium"
+        return difficulty
     elif cooking_time >= 10 and num_ingredients < 4:
         difficulty = "Intermediate"
+        return difficulty
     elif cooking_time >= 10 and num_ingredients >= 4:
         difficulty = "Hard"
-    return difficulty
+        return difficulty
             
 def create_recipe(conn, cursor):
     name = input("Name of recipe: ")
@@ -48,7 +51,7 @@ def create_recipe(conn, cursor):
     ingredient_str = ", ".join(ingredients.split(", "))
     
     sql = 'INSERT INTO Recipes (name, ingredients, cooking_time, difficulty) VALUES (%s, %s, %s, %s)'
-    val = (name, ingredient_str, cooking_time, diffculty)
+    val = (name, ingredient_str, cooking_time, difficulty)
 
     cursor.execute(sql, val)
     conn.commit()
@@ -60,12 +63,12 @@ def search_recipe(conn, cursor):
     cursor.execute("SELECT ingredients FROM Recipes")
     results = cursor.fetchall()
     all_ingredients = []
-    
+    #loop through all rows of ingredients
     for row in results:
         ingredients = row[0].split(", ")
-    for ingredient in ingredients:
-        if not ingredient in all_ingredients:
-            all_ingredients.append(ingredient)
+        for ingredient in ingredients:
+            if not ingredient in all_ingredients:
+                all_ingredients.append(ingredient)
             
             
     listed_ingredients = enumerate(all_ingredients)
@@ -82,7 +85,7 @@ def search_recipe(conn, cursor):
         return
     
     query = 'SELECT id, name, ingredients, cooking_time, difficulty FROM Recipes WHERE ingredients LIKE %s'
-    cursor.execute(query, ('%' + search_ingredient + '%'))
+    cursor.execute(query, ('%' + ingredient_searched + '%',))
     
     search_results = cursor.fetchall()
     if search_results:
@@ -100,18 +103,21 @@ def search_recipe(conn, cursor):
         
 #function to update a recipe
 def update_recipe(conn, cursor):
-    cursor.execute('SELECT id, name, cooking_time, ingredients, difficulty FROM Recipes')
+    cursor.execute('SELECT id, name, ingredients, cooking_time, difficulty FROM Recipes')
     recipes = cursor.fetchall()
+    if recipes:
+        print("Available Recipes: ")
+        for row in recipes:
+            print(
+                "ID: " + str(row[0])
+                + "\nName: " + row[1] 
+                + "\nIngredients: " + row[2] 
+                + "\nCooking Time: " + str(row[3]) + " mins" 
+                + "\nDifficulty: " + row[4]
+            )
+    else: 
+        print("No recipes found")
     
-    print("Available Recipes: ")
-    for row in recipes:
-        print(
-            "ID: " + str(row[0]) 
-            + "\nName: " + row[1] 
-            + "\nIngredients: " + row[2] 
-            + "\nCooking Time: " + str(row[3]) + " mins"
-        )
-        
     try:
         recipe_id = int(input("Enter the ID of the recipe you would like to update: "))
     except ValueError:
@@ -192,15 +198,16 @@ def delete_recipe(conn, cursor):
 #function main_menu of app
 def main_menu(conn, cursor):
     while True:
+        print("---------------------------------------")
         print("Main Menu")
-        print("===========================")
+        print("=======================================")
         print("Pick a choice:")
         print("1. Create new recipe.")
         print("2. Search for a recipe by ingredient.")
         print("3. Update an existing recipe.")
         print("4. Delete a recipe.")
         print("Type 'quit' to exit the program.")
-        choice = input("Your choice: (please enter corresponding number or quit)")
+        choice = input("Your choice: (please enter corresponding number or quit): ")
     
         if choice == '1':
             create_recipe(conn, cursor)
@@ -216,3 +223,5 @@ def main_menu(conn, cursor):
             cursor.close()
             conn.close()
             break
+# Run the main menu
+main_menu(conn, cursor)
