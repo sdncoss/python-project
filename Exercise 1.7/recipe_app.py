@@ -236,7 +236,7 @@ def edit_recipe():
                 print(delete_ingredient + " is not in recipe.")
         elif sub_choice == "3":
             new_ingredients = input("Enter all new ingredients (comma separated): ")
-            ringredients_list = new_ingredients.split(", ")
+            ingredients_list = new_ingredients.split(", ")
         else:
             print("Invalid option.")
             return None
