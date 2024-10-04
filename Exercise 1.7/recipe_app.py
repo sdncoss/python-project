@@ -144,7 +144,7 @@ def search_by_ingredients():
     # Display all available ingredients
     print("Ingredients available:")
     for idx, ingredient in enumerate(all_ingredients, start=1):
-        print(idx + ". " + ingredient)
+        print(str(idx) + ". " + ingredient)
 
     # Ask user to pick ingredients by numbers
     selected_numbers = input("Enter the numbers of ingredients to search for, separated by spaces: ")
@@ -189,7 +189,7 @@ def edit_recipe():
 
     # Ask user to pick a recipe by ID
     try:
-        recipe_id = int(input("Enter the ID of the recipe you'd like to edit: "))
+        recipe_id = int(input("\nEnter the ID of the recipe you'd like to edit: "))
         recipe_to_edit = session.get(Recipe, recipe_id)
         if not recipe_to_edit:
             print("Recipe ID not found.")
@@ -199,20 +199,48 @@ def edit_recipe():
         return None
 
     # Display the recipe details
-    print("1. Name: " + recipe_to_edit.name)
+    print("\n1. Name: " + recipe_to_edit.name)
     print("2. Ingredients: " + recipe_to_edit.ingredients)
     print("3. Cooking Time: " + str(recipe_to_edit.cooking_time) + " minutes")
 
     # Ask user which attribute to edit
-    choice = input("Which attribute would you like to edit (1, 2, or 3)? ")
+    choice = input("\nWhich attribute would you like to edit (1, 2, or 3)? ")
 
     # Edit based on user selection
     if choice == "1":
         new_name = input("Enter the new name: ")
         recipe_to_edit.name = new_name
     elif choice == "2":
-        new_ingredients = input("Enter the new ingredients (comma separated): ")
-        recipe_to_edit.ingredients = new_ingredients
+        print("\n1. Add to existing ingredients? ")
+        print("2. Delete an ingredient? ")
+        print("3. Enter all new ingretiends to recipe? ")
+        sub_choice = input("\nChoose an option (1, 2, or 3)? ")
+        
+        #convert ingredients to list
+        ingredients_list = recipe_to_edit.ingredients.split(", ")
+        
+        if sub_choice == "1":
+            new_ingredient = input("Enter the ingredient you'd like to add: ")
+            if not new_ingredient in ingredients_list:
+                ingredients_list.append(new_ingredient)
+                print("Ingredient " + new_ingredient + " has been added.")
+            else: 
+                print(new_ingredient + " is already in the ingredient list.")
+        elif sub_choice == "2":
+            print("\nCurrent ingredients: " + ', '.join(ingredients_list))
+            delete_ingredient = input("\nWhich ingredient would you like to delete? ")
+            if delete_ingredient in ingredients_list:
+                ingredients_list.remove(delete_ingredient)
+                print("Ingredient " + delete_ingredient + " has been deleted.")
+            else: 
+                print(delete_ingredient + " is not in recipe.")
+        elif sub_choice == "3":
+            new_ingredients = input("Enter all new ingredients (comma separated): ")
+            ringredients_list = new_ingredients.split(", ")
+        else:
+            print("Invalid option.")
+            return None
+        recipe_to_edit.ingredients = ", ".join(ingredients_list)
     elif choice == "3":
         try:
             new_cooking_time = int(input("Enter the new cooking time (in minutes): "))
@@ -245,7 +273,7 @@ def delete_recipe():
 
     # Ask user to pick a recipe by ID
     try:
-        recipe_id = int(input("Enter the ID of the recipe you'd like to delete: "))
+        recipe_id = int(input("\nEnter the ID of the recipe you'd like to delete: "))
         recipe_to_delete = session.get(Recipe, recipe_id)
         if not recipe_to_delete:
             print("Recipe ID not found.")
@@ -255,7 +283,7 @@ def delete_recipe():
         return None
 
     # Confirm deletion
-    confirm = input("Are you sure you want to delete " + recipe_to_delete.name + "? (yes/no): ")
+    confirm = input("\nAre you sure you want to delete " + recipe_to_delete.name + "? (yes/no): ")
     if confirm.lower() == 'yes':
         session.delete(recipe_to_delete)
         session.commit()
